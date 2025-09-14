@@ -41,6 +41,18 @@ pipeline {
             }
         }
 
+        stage('Debug') {
+            steps {
+                sh '''#!/bin/bash
+                    echo "📂 当前目录: $(pwd)"
+                    echo "📄 package.json 内容:"
+                    cat package.json || echo "❌ package.json 不存在"
+                    echo "📁 当前目录下文件列表:"
+                    ls -al
+                '''
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 sh '''#!/bin/bash
