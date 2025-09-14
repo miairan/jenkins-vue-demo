@@ -27,11 +27,11 @@ pipeline {
                     echo "🔍 可用 Node.js 版本列表："
                     nvm ls
 
-                    echo "⬇️  如果未安装则安装 Node.js 18.18.2..."
-                    nvm install 18.18.2
+                    echo "⬇️  如果未安装则安装 Node.js 22.19.0..."
+                    nvm install 22.19.0
 
-                    echo "✅ 使用 Node.js 18.18.2"
-                    nvm use 18.18.2
+                    echo "✅ 使用 Node.js 22.19.0"
+                    nvm use 22.19.0
 
                     echo "🔎 当前 Node 版本："
                     node -v
@@ -46,7 +46,7 @@ pipeline {
                 sh '''#!/bin/bash
                     export NVM_DIR="$HOME/.nvm"
                     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-                    nvm use 18.18.2
+                    nvm use 22.19.0
 
                     npm install
                 '''
@@ -58,7 +58,7 @@ pipeline {
                 sh '''#!/bin/bash
                     export NVM_DIR="$HOME/.nvm"
                     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-                    nvm use 18.18.2
+                    nvm use 22.19.0
 
                     npm test
                 '''
@@ -70,7 +70,7 @@ pipeline {
                 sh '''#!/bin/bash
                     export NVM_DIR="$HOME/.nvm"
                     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-                    nvm use 18.18.2
+                    nvm use 22.19.0
 
                     npm run build-only
                 '''
