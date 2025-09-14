@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/miairan/jenkins-demo.git'
+                git branch: 'main', url: 'https://github.com/miairan/jenkins-vue-demo.git'
             }
         }
         
