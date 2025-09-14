@@ -72,7 +72,7 @@ pipeline {
                     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
                     nvm use 18.18.2
 
-                    npm run build
+                    npm run build-only
                 '''
             }
         }
