@@ -21,11 +21,12 @@ pipeline {
             steps {
                 script {
                     // 获取 commit hash（前7位）
-                    def COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
-                    def IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
+                    COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
                 }
                 sh '''#!/bin/bash
                     echo "🛠️ 构建镜像：${IMAGE_NAME}"
+                    command -v docker
                     docker build -t ${IMAGE_NAME} .
                 '''
             }
