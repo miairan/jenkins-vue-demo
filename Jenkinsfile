@@ -10,7 +10,7 @@ pipeline {
         // 代码拉取
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/miairan/jenkins-vue-demo.git'
+                git branch: 'main', url: 'git://github.com/miairan/jenkins-vue-demo.git'
             }
         }
         // 构建镜像
