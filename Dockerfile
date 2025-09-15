@@ -7,6 +7,9 @@ RUN rm -rf /var/www/html/jenkins-demo/*
 # 3. 拷贝你构建的静态文件到 Nginx 的服务目录
 COPY dist/ /var/www/html/jenkins-demo/
 
+# 4. 拷贝自定义 nginx 配置
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # 4. 暴露端口
 EXPOSE 80
 
