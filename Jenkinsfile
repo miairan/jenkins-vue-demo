@@ -47,13 +47,13 @@ pipeline {
         // 运行容器
         stage('Docker Run') {
             steps {
-                sh '''#!/bin/bash
+                sh """#!/bin/bash
                     echo "🧹 停止并删除旧容器（如果存在）"
                     docker stop jenkins-vue-demo || true
                     docker rm jenkins-vue-demo || true
                     echo "🚀 启动新容器"
                     docker run -d -p 8088:80 --name jenkins-vue-demo ${IMAGE_NAME}
-                '''
+                """
             }
         }
 
