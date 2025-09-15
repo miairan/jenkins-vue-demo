@@ -15,6 +15,16 @@ pipeline {
                     url: 'git@github.com:miairan/jenkins-vue-demo.git'
             }
         }
+        stage('Check Docker Build Mode') {
+            steps {
+                sh '''
+                echo "[DEBUG] Jenkins docker path: $(which docker)"
+                echo "[DEBUG] docker --version: $(docker --version)"
+                echo "[DEBUG] DOCKER_BUILDKIT=$DOCKER_BUILDKIT"
+                echo "[DEBUG] DOCKER_CLI_EXPERIMENTAL=$DOCKER_CLI_EXPERIMENTAL"
+                '''
+            }
+        }
         // 构建镜像
         stage('Docker Build') {
             // 镜像动态命名：使用commit哈希
