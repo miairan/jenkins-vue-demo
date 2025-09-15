@@ -2,10 +2,10 @@ def IMAGE_NAME = ""
 pipeline {
     agent any
     
-    environment {
-        // DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
-        // DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
-    }
+    // environment {
+    //     // DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
+    //     // DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
+    // }
     
     stages {
         // 代码拉取
