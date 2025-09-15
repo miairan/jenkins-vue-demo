@@ -1,13 +1,13 @@
+def IMAGE_NAME = ""
 pipeline {
     agent any
     
     environment {
-        DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
-        DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
+        // DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
+        // DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
     }
     
     stages {
-        def IMAGE_NAME = ""
         // 代码拉取
         stage('Checkout') {
             steps {
@@ -36,9 +36,9 @@ pipeline {
                     IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
                 }
                 sh '''#!/bin/bash
-                    echo "🛠️ 构建镜像：${IMAGE_NAME}"
+                    echo "🛠️ 构建镜像：${COMMIT_HASH}，${IMAGE_NAME}"
                     command -v docker
-                    docker build -t ${IMAGE_NAME} .
+                    docker build --load -t ${IMAGE_NAME} .
                 '''
             }
         }
