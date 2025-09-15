@@ -5,8 +5,9 @@ pipeline {
         DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
         DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
     }
-
+    
     stages {
+        def IMAGE_NAME = ""
         // 代码拉取
         stage('Checkout') {
             steps {
@@ -31,7 +32,7 @@ pipeline {
             steps {
                 script {
                     // 获取 commit hash（前7位）
-                    COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    def COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
                 }
                 sh '''#!/bin/bash
@@ -50,7 +51,7 @@ pipeline {
                     docker stop jenkins-vue-demo || true
                     docker rm jenkins-vue-demo || true
                     echo "🚀 启动新容器"
-                    docker run -d -p 8088:80 --name jenkins-vue-demo $IMAGE_NAME
+                    docker run -d -p 8088:80 --name jenkins-vue-demo ${IMAGE_NAME}
                 '''
             }
         }
