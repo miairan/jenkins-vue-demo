@@ -7,90 +7,37 @@ pipeline {
     }
 
     stages {
+        // 代码拉取
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/miairan/jenkins-vue-demo.git'
             }
         }
-        
-        stage('Check nvm & Node.js') {
-            steps {
-                sh '''#!/bin/bash
-                    echo "👉 当前用户是：$(whoami)"
-                    echo "👉 NVM_DIR=$NVM_DIR"
-                    ls -la $NVM_DIR
-
-                    # 加载 nvm
-                    export NVM_DIR="$HOME/.nvm"
-                    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
-                    echo "🔍 可用 Node.js 版本列表："
-                    nvm ls
-
-                    echo "⬇️  如果未安装则安装 Node.js 22.19.0..."
-                    nvm install 22.19.0
-
-                    echo "✅ 使用 Node.js 22.19.0"
-                    nvm use 22.19.0
-
-                    echo "🔎 当前 Node 版本："
-                    node -v
-                    echo "🔎 当前 npm 版本："
-                    npm -v
-                '''
-            }
-        }
-
-        stage('Debug') {
-            steps {
-                sh '''#!/bin/bash
-                    echo "📂 当前目录: $(pwd)"
-                    echo "📄 package.json 内容:"
-                    cat package.json || echo "❌ package.json 不存在"
-                    echo "📁 当前目录下文件列表:"
-                    ls -al
-                '''
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                sh '''#!/bin/bash
-                    export NVM_DIR="$HOME/.nvm"
-                    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-                    nvm use 22.19.0
-
-                    npm install
-                '''
-            }
-        }
-
-        
-
-        stage('Build') {
-            steps {
-                sh '''#!/bin/bash
-                    export NVM_DIR="$HOME/.nvm"
-                    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-                    nvm use 22.19.0
-
-                    npm run build
-                '''
-            }
-        }
-
+        // 构建镜像
         stage('Docker Build') {
+            // 镜像动态命名：使用commit哈希
             steps {
-                sh 'docker build -t jenkins-vue-demo .'
+                script {
+                    // 获取 commit hash（前7位）
+                    COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
+                }
+                sh '''#!/bin/bash
+                    echo "🛠️ 构建镜像：$IMAGE_NAME"
+                    docker build -t $IMAGE_NAME .
+                '''
             }
         }
 
+        // 运行容器
         stage('Docker Run') {
             steps {
-                sh '''
-                docker stop jenkins-vue-demo || true
-                docker rm jenkins-vue-demo || true
-                docker run -d -p 8088:80 --name jenkins-vue-demo jenkins-vue-demo
+                sh '''#!/bin/bash
+                    echo "🧹 停止并删除旧容器（如果存在）"
+                    docker stop jenkins-vue-demo || true
+                    docker rm jenkins-vue-demo || true
+                    echo "🚀 启动新容器"
+                    docker run -d -p 8088:80 --name jenkins-vue-demo $IMAGE_NAME
                 '''
             }
         }
