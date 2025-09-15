@@ -10,8 +10,8 @@ COPY dist/ /var/www/html/jenkins-demo/
 # 4. 拷贝自定义 nginx 配置
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# 4. 暴露端口
+# 5. 暴露端口
 EXPOSE 80
 
-# 5. 默认启动命令（nginx）
+# 6. 默认启动命令（nginx）
 CMD ["nginx", "-g", "daemon off;"]
