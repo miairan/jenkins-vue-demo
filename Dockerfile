@@ -1,5 +1,5 @@
 # ===== 第一阶段：构建（使用指定版本node安装依赖、构建产物） =====
-FROM node:22-alpine AS builder
+FROM node:20.19.0-alpine AS builder
 
 WORKDIR /app
 COPY . .
