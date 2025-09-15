@@ -1,0 +1,13 @@
+{
+  "registry-mirrors": [
+    "https://docker.m.daocloud.io",
+    "https://dockerproxy.com",
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://docker.nju.edu.cn",
+    "https://iju9kaj2.mirror.aliyuncs.com",
+    "http://hub-mirror.c.163.com",
+    "https://cr.console.aliyun.com",
+    "https://hub.docker.com",
+    "http://mirrors.ustc.edu.cn"
+  ]
+}
