@@ -10,7 +10,9 @@ pipeline {
         // 代码拉取
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git://github.com/miairan/jenkins-vue-demo.git'
+                git credentialsId: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJ7wWz+Rv7ejQDfMl3MoZEtiMY+zFw66yRFoSLwbkL0IzMWD01IrNu5pbSHxDZ6NulJG/yg/7z+xFI5+S16IBYe/6C1RwMiRBF6bBunR343DonGzw5u8SBqr6NSLe8G6r5SP+OHeNmzC6lk4UlSsF6q3g9W0OvyFbD5A2LVEIykeiBcgh69TRMQSujOmw+j7leiidGhIzuSLg2BquJxLGcDGi1lv65ZKYmL6VMJdazMfGRwSFK2NAzKqdLa7OfOhbxuGYafRYChvEx5gyWKfDsjMD1tappizrpXrm/oKo1SimdgpuQuoEev1idr+VoNco6zbSLKd2988bJvSEmxBFAJtZDlBD587/GVhVqoTHBazRzqbRJvvOvV2AMrPutyEQd13b7XoAuCMdWpy2wZOyB36dVJZZlo5lzaKZuUxfqDhwxaD+d9pZ2etLHuzsL4jdxem9GROv0/mLuKNAlXhG0RduxgLoPBiEiQyKULx3wHaRQHi9lcbPWdZz10pxceTxRDoBa0xVSITuiJ63pCjOvmwQLZp12dAz6+VmCAR9YUmwHp1cuNrhbPSqtIwNSnxCb9On/t8SNNzxObzkZibC6dV5ucK1+tze4PBGDqpOl+8FqAHGkGIoAMqYJf0NVvtyfYtA6nFszG+dMhADkb+Fo4f4Gi/oKqkF94VRuVsPIVw== jenkins@ci',
+                    branch: 'main', 
+                    url: 'git@github.com:miairan/jenkins-vue-demo.git'
             }
         }
         // 构建镜像
