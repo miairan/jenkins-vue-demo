@@ -79,27 +79,23 @@ pipeline {
             }
         }
 
-        stage('Deploy to Nginx') {
+        stage('Docker Build') {
             steps {
-                sh '''#!/bin/bash
-                    echo "📦 开始部署..."
+                sh 'docker build -t jenkins-vue-demo .'
+            }
+        }
 
-                    # 假设构建产物输出在 dist 目录
-                    BUILD_DIR=dist
-
-                    # 假设 Nginx 的部署目录为 /var/www/html/jenkins-demo
-                    DEPLOY_DIR=/var/www/html/jenkins-demo
-
-                    # 创建部署目录（如果不存在）
-                    sudo mkdir -p $DEPLOY_DIR
-
-                    # 拷贝构建文件（注意：Jenkins 默认工作目录可能不是 root 用户）
-                    sudo cp -r $BUILD_DIR/* $DEPLOY_DIR/
-
-                    echo "✅ 部署完成，已更新到 $DEPLOY_DIR"
+        stage('Docker Run') {
+            steps {
+                sh '''
+                docker stop jenkins-vue-demo || true
+                docker rm jenkins-vue-demo || true
+                docker run -d -p 8088:80 --name jenkins-vue-demo jenkins-vue-demo
                 '''
             }
         }
+
+        
     }
 
     post {
