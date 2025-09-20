@@ -11,6 +11,9 @@ pipeline {
         string(name: 'GIT_CREDENTIALS_ID', defaultValue: 'github-ssh', description: 'Git SSH Key Credential ID')
         string(name: 'BRANCH_NAME', defaultValue: 'main')
     }
+    triggers {
+        githubPush() // 添加这一行：监听 GitHub push 事件
+    }
     
     stages {
         // 代码拉取
