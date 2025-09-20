@@ -2,11 +2,11 @@
 pipeline {
     agent any
     
-    environment { // 用于声明 环境变量，在构建过程中注入这些变量（每步构建都会），可读写。
+    // environment { // 用于声明 环境变量，在构建过程中注入这些变量（每步构建都会），可读写。
         // DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
         // DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
-        IMAGE_NAME = ''
-    }
+        // IMAGE_NAME = '' // 声明在这儿也无法安全跨stage持久生效。
+    // }
     parameters { // 用于声明 构建参数，可在UI页面填写或默认使用，只读。
         string(name: 'GIT_CREDENTIALS_ID', defaultValue: 'github-ssh', description: 'Git SSH Key Credential ID')
         string(name: 'BRANCH_NAME', defaultValue: 'main')
@@ -39,24 +39,22 @@ pipeline {
                 '''
             }
         }
+        // 构建准备：镜像动态命名
+        stage('Prepare') {
+            script {
+                // 获取 commit hash（前7位）
+                def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim().replaceAll("[^a-zA-Z0-9]", "") // 只保留合法字符
+                def imageName = "jenkins-vue-demo:${commitHash}"
+                writeFile file: '.image_name', text: imageName
+            }
+        }
         // 构建镜像
         stage('Docker Build') {
-            // 镜像动态命名：使用commit哈希
             steps {
                 script {
-                    // 获取 commit hash（前7位）
-                    def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim().replaceAll("[^a-zA-Z0-9]", "")
-                    def imageName = "jenkins-vue-demo:${commitHash}" // 只保留合法字符
-                    env.IMAGE_NAME = imageName
-                    echo "[1] Groovy: ${imageName}"
-                    echo "[2] Groovy env: ${env.IMAGE_NAME}"
-
-                    sh "echo [3] Shell 拼接: ${imageName}"
-
-                    echo "🛠️ 构建镜像：${env.IMAGE_NAME}"
-                    withEnv(["IMAGE_NAME=${imageName}"]) {
-                        sh "docker build --load -t $IMAGE_NAME ."
-                    }
+                    def imageName = readFile('.image_name').trim()
+                    echo "🛠️ 构建镜像：${imageName}"
+                    sh "docker build --load -t $imageName ."
                 }
             }
         }
@@ -65,16 +63,14 @@ pipeline {
         stage('Docker Run') {
             steps {
                 script {
-                    def imageName = env.IMAGE_NAME
-                    withEnv(["IMAGE_NAME=${imageName}"]) {
-                        sh """#!/bin/bash
-                            echo "🧹 停止并删除旧容器（如果存在）"
-                            docker stop jenkins-vue-demo || true
-                            docker rm jenkins-vue-demo || true
-                            echo "🚀 启动新容器"
-                            docker run -d -p 8088:80 --name jenkins-vue-demo $IMAGE_NAME
-                        """
-                    }
+                    def imageName = readFile('.image_name').trim()
+                    sh """#!/bin/bash
+                        echo "🧹 停止并删除旧容器（如果存在）"
+                        docker stop jenkins-vue-demo || true
+                        docker rm jenkins-vue-demo || true
+                        echo "🚀 启动新容器${imageName}"
+                        docker run -d -p 8088:80 --name jenkins-vue-demo ${imageName}
+                    """
                 }
                 
             }
