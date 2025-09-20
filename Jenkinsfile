@@ -45,28 +45,34 @@ pipeline {
             steps {
                 script {
                     // 获取 commit hash（前7位）
-                    def commitRaw = sh(script: "git rev-parse --short HEAD", returnStdout: true)
-                    def COMMIT_HASH = commitRaw.trim().replaceAll("[^a-zA-Z0-9]", "") // 只保留合法字符
-                    env.IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
+                    def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim().replaceAll("[^a-zA-Z0-9]", "")
+                    def imageName = "jenkins-vue-demo:${commitHash}" // 只保留合法字符
+                    env.IMAGE_NAME = imageName
+
+                    echo "🛠️ 构建镜像：${env.IMAGE_NAME}"
+                    withEnv(["IMAGE_NAME=${imageName}"]) {
+                        sh "docker build --load -t $IMAGE_NAME ."
+                    }
                 }
-                echo "🛠️ 构建镜像：${env.IMAGE_NAME}"
-                sh """#!/bin/bash
-                    command -v docker
-                    docker build --load -t $IMAGE_NAME .
-                """
             }
         }
 
         // 运行容器
         stage('Docker Run') {
             steps {
-                sh """#!/bin/bash
-                    echo "🧹 停止并删除旧容器（如果存在）"
-                    docker stop jenkins-vue-demo || true
-                    docker rm jenkins-vue-demo || true
-                    echo "🚀 启动新容器"
-                    docker run -d -p 8088:80 --name jenkins-vue-demo $IMAGE_NAME
-                """
+                script {
+                    def imageName = env.IMAGE_NAME
+                    withEnv(["IMAGE_NAME=${imageName}"]) {
+                        sh """#!/bin/bash
+                            echo "🧹 停止并删除旧容器（如果存在）"
+                            docker stop jenkins-vue-demo || true
+                            docker rm jenkins-vue-demo || true
+                            echo "🚀 启动新容器"
+                            docker run -d -p 8088:80 --name jenkins-vue-demo $IMAGE_NAME
+                        """
+                    }
+                }
+                
             }
         }
 
