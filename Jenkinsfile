@@ -66,12 +66,23 @@ pipeline {
             steps {
                 script {
                     def imageName = readFile('.image_name').trim()
+                    def basePort = 8088
+                    def hostPort = basePort
+                    while (true) {
+                        def inUse = sh(script: "lsof -i :${hostPort}", returnStatus: true)
+                        if (inUse != 0) {
+                            break // 找到空闲端口
+                        }
+                        hostPort++
+                    }
+
+                    echo "✅ 使用端口 ${hostPort}"
                     sh """#!/bin/bash
                         echo "🧹 停止并删除旧容器（如果存在）"
                         docker stop jenkins-vue-demo || true
                         docker rm jenkins-vue-demo || true
                         echo "🚀 启动新容器${imageName}"
-                        docker run -d -p 8088:80 --name jenkins-vue-demo ${imageName}
+                        docker run -d -p ${hostPort}:80 --name jenkins-vue-demo ${imageName}
                     """
                 }
                 
