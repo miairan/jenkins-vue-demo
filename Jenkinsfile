@@ -48,6 +48,10 @@ pipeline {
                     def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim().replaceAll("[^a-zA-Z0-9]", "")
                     def imageName = "jenkins-vue-demo:${commitHash}" // 只保留合法字符
                     env.IMAGE_NAME = imageName
+                    echo "[1] Groovy: ${imageName}"
+                    echo "[2] Groovy env: ${env.IMAGE_NAME}"
+
+                    sh "echo [3] Shell 拼接: ${imageName}"
 
                     echo "🛠️ 构建镜像：${env.IMAGE_NAME}"
                     withEnv(["IMAGE_NAME=${imageName}"]) {
