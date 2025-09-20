@@ -70,8 +70,34 @@ pipeline {
 
         // 运行容器
         stage('Docker Run') {
-            /* steps {
+            steps {
                 script {
+                    def imageName = readFile('.image_name').trim()
+                    def basePort = 8088
+                    def hostPort = basePort
+
+                    // 检查 docker 是否占用了该端口
+                    def isPortAvailable = { port ->
+                        sh(script: "docker ps --format '{{.Ports}}' | grep -q ':${port}->'", returnStatus: true) != 0
+                    }
+
+                    while (!isPortAvailable(hostPort)) {
+                        hostPort++
+                    }
+
+                    echo "✅ 使用端口 ${hostPort}"
+
+                    sh """
+                        echo "🧹 停止并删除旧容器（如果存在）"
+                        docker stop jenkins-vue-demo || true
+                        docker rm jenkins-vue-demo || true
+
+                        echo "🚀 启动新容器 ${imageName}"
+                        docker run -d -p ${hostPort}:80 --name jenkins-vue-demo ${imageName}
+                    """
+                }
+                
+                /* script {
                     def imageName = readFile('.image_name').trim()
                     def basePort = 8088
                     def hostPort = basePort
@@ -91,34 +117,10 @@ pipeline {
                         echo "🚀 启动新容器${imageName}"
                         docker run -d -p ${hostPort}:80 --name jenkins-vue-demo ${imageName}
                     """
-                }
+                } */
                 
-            } */
-            script {
-                def imageName = readFile('.image_name').trim()
-                def basePort = 8088
-                def hostPort = basePort
-
-                // 检查 docker 是否占用了该端口
-                def isPortAvailable = { port ->
-                    sh(script: "docker ps --format '{{.Ports}}' | grep -q ':${port}->'", returnStatus: true) != 0
-                }
-
-                while (!isPortAvailable(hostPort)) {
-                    hostPort++
-                }
-
-                echo "✅ 使用端口 ${hostPort}"
-
-                sh """
-                    echo "🧹 停止并删除旧容器（如果存在）"
-                    docker stop jenkins-vue-demo || true
-                    docker rm jenkins-vue-demo || true
-
-                    echo "🚀 启动新容器 ${imageName}"
-                    docker run -d -p ${hostPort}:80 --name jenkins-vue-demo ${imageName}
-                """
             }
+                
         }
 
         
