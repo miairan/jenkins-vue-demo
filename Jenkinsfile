@@ -24,7 +24,10 @@ pipeline {
                             credentialsId: "${params.GIT_CREDENTIALS_ID}" // 在Credentials里查找ID=构建参数的凭据来使用，Job配置页面下拉选的Credentials失效。如果有Passphrase，因为创建凭据时，已经添加了Passphrase（且必须这么添加），所以此处就不用（也不能）配置。
                         ]
                     ],
-                    branches: [[name: "*/${params.BRANCH_NAME}"]]
+                    branches: [[name: "*/${params.BRANCH_NAME}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    submoduleCfg: [],
+                    extensions: []
                 ])
                 
             }
