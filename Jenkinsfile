@@ -1,19 +1,29 @@
-def IMAGE_NAME = ""
+// def IMAGE_NAME = "" // def用在脚本中定义局部变量，用在脚本外定义全局变量。Jenkinsfile使用Groovy声明式，声明式规范中在pipeline外定义变量不生效，只是Jenkins在运行声明式Jenkinsfile时，会先转换为脚本式运行，所以这儿生效了。声明式推荐在environment和parameters里定义全局变量。
 pipeline {
     agent any
     
-    // environment {
-    //     // DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
-    //     // DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
-    // }
+    environment { // 用于声明 环境变量，在构建过程中注入这些变量（每步构建都会），可读写。
+        // DOCKER_BUILDKIT = '0' // 关闭BuildKit（Docker28+开始这个值默认是1）
+        // DOCKER_CLI_EXPERIMENTAL = 'disabled' // 禁用（Docker28+开始这个值默认是true）
+        IMAGE_NAME = ''
+    }
+    parameters { // 用于声明 构建参数，可在UI页面填写或默认使用，只读。
+        string(name: 'GIT_CREDENTIALS_ID', defaultValue: 'github-ssh', description: 'Git SSH Key Credential ID')
+        string(name: 'BRANCH_NAME', defaultValue: 'main')
+    }
     
     stages {
         // 代码拉取
         stage('Checkout') {
             steps {
-                git credentialsId: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDJ7wWz+Rv7ejQDfMl3MoZEtiMY+zFw66yRFoSLwbkL0IzMWD01IrNu5pbSHxDZ6NulJG/yg/7z+xFI5+S16IBYe/6C1RwMiRBF6bBunR343DonGzw5u8SBqr6NSLe8G6r5SP+OHeNmzC6lk4UlSsF6q3g9W0OvyFbD5A2LVEIykeiBcgh69TRMQSujOmw+j7leiidGhIzuSLg2BquJxLGcDGi1lv65ZKYmL6VMJdazMfGRwSFK2NAzKqdLa7OfOhbxuGYafRYChvEx5gyWKfDsjMD1tappizrpXrm/oKo1SimdgpuQuoEev1idr+VoNco6zbSLKd2988bJvSEmxBFAJtZDlBD587/GVhVqoTHBazRzqbRJvvOvV2AMrPutyEQd13b7XoAuCMdWpy2wZOyB36dVJZZlo5lzaKZuUxfqDhwxaD+d9pZ2etLHuzsL4jdxem9GROv0/mLuKNAlXhG0RduxgLoPBiEiQyKULx3wHaRQHi9lcbPWdZz10pxceTxRDoBa0xVSITuiJ63pCjOvmwQLZp12dAz6+VmCAR9YUmwHp1cuNrhbPSqtIwNSnxCb9On/t8SNNzxObzkZibC6dV5ucK1+tze4PBGDqpOl+8FqAHGkGIoAMqYJf0NVvtyfYtA6nFszG+dMhADkb+Fo4f4Gi/oKqkF94VRuVsPIVw== jenkins@ci',
-                    branch: 'main', 
-                    url: 'git@github.com:miairan/jenkins-vue-demo.git'
+                $class: 'GitSCM', // 调用的“底层构建器类”，可选值"GitSCM"（最常见）、"SubversionSCM"、"CVSSCM"、"MultiSCM"（同时拉多个SCM源）
+                userRemoteConfigs: [
+                    [
+                        url: 'git@github.com:miairan/jenkins-vue-demo.git',
+                        credentialsId: "${params.GIT_CREDENTIALS_ID}" // 在Credentials里查找ID=构建参数的凭据来使用，Job配置页面下拉选的Credentials失效。如果有Passphrase，因为创建凭据时，已经添加了Passphrase（且必须这么添加），所以此处就不用（也不能）配置。
+                    ]
+                ],
+                branches: [[name: "*/${params.BRANCH_NAME}"]]
             }
         }
         stage('Check Docker Build Mode') {
@@ -34,12 +44,12 @@ pipeline {
                     // 获取 commit hash（前7位）
                     def commitRaw = sh(script: "git rev-parse --short HEAD", returnStdout: true)
                     def COMMIT_HASH = commitRaw.trim().replaceAll("[^a-zA-Z0-9]", "") // 只保留合法字符
-                    IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
+                    env.IMAGE_NAME = "jenkins-vue-demo:${COMMIT_HASH}"
                 }
-                echo "🛠️ 构建镜像：${IMAGE_NAME}"
+                echo "🛠️ 构建镜像：${env.IMAGE_NAME}"
                 sh """#!/bin/bash
                     command -v docker
-                    docker build --load -t ${IMAGE_NAME} .
+                    docker build --load -t $IMAGE_NAME .
                 """
             }
         }
@@ -52,7 +62,7 @@ pipeline {
                     docker stop jenkins-vue-demo || true
                     docker rm jenkins-vue-demo || true
                     echo "🚀 启动新容器"
-                    docker run -d -p 8088:80 --name jenkins-vue-demo ${IMAGE_NAME}
+                    docker run -d -p 8088:80 --name jenkins-vue-demo $IMAGE_NAME
                 """
             }
         }
