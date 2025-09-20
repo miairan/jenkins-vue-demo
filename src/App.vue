@@ -9,7 +9,7 @@ const navList = [
 </script>
 
 <template>
-  <h2>当前点击时鼠标的坐位为：x {{ point.x || '_' }}，y：{{ point.y || '_' }}。{{ msg }}</h2>
+  <h2>当前点击时鼠标的坐位为：x坐标 {{ point.x || '_' }}，y坐标：{{ point.y || '_' }}。{{ msg }}</h2>
   <div class="navigate">
     <router-link v-for="nav in navList" :to="nav.path" active-class="active" :key="nav.id">{{ nav.name }}</router-link>
   </div>
