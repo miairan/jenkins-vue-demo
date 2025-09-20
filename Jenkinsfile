@@ -41,11 +41,13 @@ pipeline {
         }
         // 构建准备：镜像动态命名
         stage('Prepare') {
-            script {
-                // 获取 commit hash（前7位）
-                def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim().replaceAll("[^a-zA-Z0-9]", "") // 只保留合法字符
-                def imageName = "jenkins-vue-demo:${commitHash}"
-                writeFile file: '.image_name', text: imageName
+            steps {
+                script {
+                    // 获取 commit hash（前7位）
+                    def commitHash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim().replaceAll("[^a-zA-Z0-9]", "") // 只保留合法字符
+                    def imageName = "jenkins-vue-demo:${commitHash}"
+                    writeFile file: '.image_name', text: imageName
+                }
             }
         }
         // 构建镜像
