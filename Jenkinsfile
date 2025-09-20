@@ -77,8 +77,11 @@ pipeline {
                     def hostPort = basePort
 
                     // 检查 docker 是否占用了该端口
+                    // def isPortAvailable = { port ->
+                    //     sh(script: "docker ps --format '{{.Ports}}' | grep -q ':${port}->'", returnStatus: true) != 0
+                    // }
                     def isPortAvailable = { port ->
-                        sh(script: "docker ps --format '{{.Ports}}' | grep -q ':${port}->'", returnStatus: true) != 0
+                        sh(script: "ss -tuln | grep -q ':${port} '", returnStatus: true) != 0
                     }
 
                     while (!isPortAvailable(hostPort)) {
@@ -88,9 +91,11 @@ pipeline {
                     echo "✅ 使用端口 ${hostPort}"
 
                     sh """
-                        echo "🧹 停止并删除旧容器（如果存在）"
+                        echo "🧹 清理僵尸容器"
                         docker stop jenkins-vue-demo || true
                         docker rm jenkins-vue-demo || true
+                        docker container prune -f || true
+                        docker network prune -f || true
 
                         echo "🚀 启动新容器 ${imageName}"
                         docker run -d -p ${hostPort}:80 --name jenkins-vue-demo ${imageName}
